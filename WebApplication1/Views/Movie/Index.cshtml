@@ -1,0 +1,56 @@
+﻿@model IEnumerable<WebApplication1.Models.Movie>
+
+@{
+    ViewData["Title"] = "Movies List";
+}
+
+<h2 style="text-align:center; margin-bottom:30px;">Movies List</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <p style="text-align:center;">No movies available.</p>
+}
+else
+{
+    <div style="display:flex; justify-content:center;">
+        <table style="
+            width:60%;
+            border-collapse:collapse;
+            box-shadow:0 4px 8px rgba(0,0,0,0.1);
+            background-color:white;
+        ">
+            <thead style="background-color:#343a40; color:white;">
+            <tr>
+                <th style="padding:12px; border:1px solid #ddd;">Id</th>
+                <th style="padding:12px; border:1px solid #ddd;">Name</th>
+                <th style="padding:12px; border:1px solid #ddd;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var movie in Model)
+            {
+                <tr style="text-align:center;">
+                    <td style="padding:10px; border:1px solid #ddd;">
+                        @movie.Id
+                    </td>
+                    <td style="padding:10px; border:1px solid #ddd;">
+                        @movie.Name
+                    </td>
+                    <td style="padding:10px; border:1px solid #ddd;">
+                        <a href="/Movie/Details/@movie.Id"
+                           style="
+                                    text-decoration:none;
+                                    background-color:#007bff;
+                                    color:white;
+                                    padding:6px 12px;
+                                    border-radius:5px;
+                               ">
+                            View Details
+                        </a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
