@@ -10,6 +10,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Ajouter les services MVC
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IMovieService, MovieService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
 {

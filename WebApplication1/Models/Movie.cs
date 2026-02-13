@@ -10,4 +10,6 @@ public class Movie
     //  TP3
     public string? ImageFile { get; set; }
     public DateTime? DateAjoutMovie { get; set; }
+    public int Stock { get; set; }
+
 }

@@ -11,11 +11,13 @@ public class MovieController : Controller
     private readonly ApplicationDbContext _db;
 
     private readonly IWebHostEnvironment _env;
+    private readonly IMovieService _movieService;
 
-    public MovieController(ApplicationDbContext db, IWebHostEnvironment env)
+    public MovieController(ApplicationDbContext db, IWebHostEnvironment env,IMovieService movieService)
     {
         _db = db;
         _env = env;
+        _movieService = movieService;
     }
 
 

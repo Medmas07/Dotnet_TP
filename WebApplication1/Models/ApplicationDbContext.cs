@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using ASPCoreFirstApp.Models;
 using WebApplication1.Models;
 
 public class ApplicationDbContext : DbContext
@@ -11,6 +12,9 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Movie> Movies { get; set; }
     public DbSet<Genre> Genres { get; set; }
+    public DbSet<Customer> Customers { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

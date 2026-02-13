@@ -16,6 +16,55 @@ namespace WebApplication1.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
 
+            modelBuilder.Entity("ASPCoreFirstApp.Models.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Discount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsSubscribed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Changes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EntityKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TableName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditLogs");
+                });
+
             modelBuilder.Entity("WebApplication1.Models.Genre", b =>
                 {
                     b.Property<Guid>("Id")
@@ -55,6 +104,9 @@ namespace WebApplication1.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Stock")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GenreId");
@@ -66,13 +118,15 @@ namespace WebApplication1.Migrations
                         {
                             Id = 1,
                             GenreId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Name = "Seed Movie 1"
+                            Name = "Seed Movie 1",
+                            Stock = 0
                         },
                         new
                         {
                             Id = 2,
                             GenreId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Name = "Seed Movie 2"
+                            Name = "Seed Movie 2",
+                            Stock = 0
                         });
                 });
 
