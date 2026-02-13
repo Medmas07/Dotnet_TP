@@ -1,0 +1,42 @@
+﻿@model WebApplication1.ViewModels.MovieVM
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+
+    <div class="mb-3">
+        <label>Name</label>
+        <input asp-for="movie.Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Date Ajout</label>
+        <input asp-for="movie.DateAjoutMovie" type="datetime-local" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Genre</label>
+        <select asp-for="movie.GenreId"
+                asp-items="ViewBag.Genres"
+                class="form-control">
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Photo</label>
+        <input asp-for="photo" type="file" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+
+</form>
+
+@if (ViewBag.Errors != null)
+{
+    <div class="text-danger">
+        <ul>
+            @foreach (string error in ViewBag.Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}

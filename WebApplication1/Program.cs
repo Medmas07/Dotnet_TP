@@ -1,7 +1,21 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.EntityFrameworkCore;
+using WebApplication1.Models;
+using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data;
 
+
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Ajouter les services MVC
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+{
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .AddInterceptors(serviceProvider.GetRequiredService<AuditInterceptor>());
+});
 
 var app = builder.Build();
 
@@ -24,5 +38,11 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Movie}/{action=Index}/{id?}"
 );
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    SeedData.Initialize(services);
+}
 
 app.Run();

@@ -1,74 +1,153 @@
-﻿using ASPCoreFirstApp.Models;
-using ASPCoreFirstApp.ViewModels;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
+using WebApplication1.ViewModels;
 
-namespace WebApplication1.Controllers
+namespace WebApplication1.Controllers;
+
+public class MovieController : Controller
 {
-    public class MovieController : Controller
+    private readonly ApplicationDbContext _db;
+
+    private readonly IWebHostEnvironment _env;
+
+    public MovieController(ApplicationDbContext db, IWebHostEnvironment env)
     {
-        // GET: /Movie
-        public IActionResult Index()
-        {
-            List<Movie> movies = new List<Movie>()
-            {
-                new Movie { Id=1, Name="Movie 1" },
-                new Movie { Id=2, Name="Movie 2" },
-                new Movie { Id=3, Name="Movie 3" }
-            };
+        _db = db;
+        _env = env;
+    }
 
-            return View(movies);
+
+    // INDEX + TRI + PAGINATION
+    public IActionResult Index(string sortOrder, int page = 1)
+    {
+        int pageSize = 5;
+
+        var movies = _db.Movies.Include(m => m.Genre).AsQueryable();
+
+        ViewData["NameSort"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+
+        switch (sortOrder)
+        {
+            case "name_desc":
+                movies = movies.OrderByDescending(m => m.Name);
+                break;
+            default:
+                movies = movies.OrderBy(m => m.Name);
+                break;
         }
 
-        // GET: /Movie/Edit/1
-        public IActionResult Edit(int id)
+        var pagedMovies = movies
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return View(pagedMovies);
+    }
+
+    public IActionResult Details(int id)
+    {
+        var movie = _db.Movies
+            .Include(m => m.Genre)
+            .FirstOrDefault(m => m.Id == id);
+
+        if (movie == null)
+            return NotFound();
+
+        return View(movie);
+    }
+
+    public IActionResult Create()
+    {
+        ViewBag.Genres = new SelectList(_db.Genres, "Id", "Name");
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Create(MovieVM model)
+    {
+        if (!ModelState.IsValid)
         {
-            return Content("Test Id " + id);
+            ViewBag.Errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return View(model);
         }
 
-        // ✅ Convention Based Routing
-        // GET: /Movie/ByRelease/2020/3
-        public IActionResult ByRelease(int year, int month)
+        if (model.photo == null)
+            return Content("File not uploaded");
+
+        var fileName = Guid.NewGuid() + Path.GetExtension(model.photo.FileName);
+        var path = Path.Combine(_env.WebRootPath, "images", fileName);
+
+        using (var stream = new FileStream(path, FileMode.Create))
         {
-            return Content($"Movies released in {month}/{year}");
+            model.photo.CopyTo(stream);
         }
 
-        // ✅ Attribute Routing
-        [Route("Movie/released/{year:int}/{month:int}")]
-        public IActionResult Released(int year, int month)
+        var movie = new Movie
         {
-            return Content($"(Attribute Routing) Movies released in {month}/{year}");
+            Name = model.movie.Name,
+            GenreId = model.movie.GenreId,
+            DateAjoutMovie = model.movie.DateAjoutMovie,
+            ImageFile = fileName
+        };
+
+        _db.Movies.Add(movie);
+        _db.SaveChanges();
+
+        return RedirectToAction(nameof(Index));
+    }
+
+
+    public IActionResult Edit(int id)
+    {
+        var movie = _db.Movies.Find(id);
+        if (movie == null) return NotFound();
+
+        ViewBag.Genres = new SelectList(_db.Genres, "Id", "Name", movie.GenreId);
+        return View(movie);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Edit(Movie movie)
+    {
+        if (ModelState.IsValid)
+        {
+            _db.Movies.Update(movie);
+            _db.SaveChanges();
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Movie/Details/1
-        public IActionResult Details(int id)
+        return View(movie);
+    }
+
+    public IActionResult Delete(int id)
+    {
+        var movie = _db.Movies.Include(m => m.Genre)
+            .FirstOrDefault(m => m.Id == id);
+
+        if (movie == null) return NotFound();
+
+        return View(movie);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public IActionResult DeleteConfirmed(int id)
+    {
+        var movie = _db.Movies.Find(id);
+        if (movie != null)
         {
-            var movie = new Movie { Id = id, Name = "Movie " + id };
-            return View(movie);
+            _db.Movies.Remove(movie);
+            _db.SaveChanges();
         }
 
-        // Pass Customer + Movies using ViewModel
-        public IActionResult CustomerMovies()
-        {
-            var customer = new Customer
-            {
-                Id = 1,
-                Name = "Ahmed"
-            };
-
-            var movies = new List<Movie>
-            {
-                new Movie { Id=1, Name="Movie 1" },
-                new Movie { Id=2, Name="Movie 2" }
-            };
-
-            var viewModel = new MovieCustomerViewModel
-            {
-                Customer = customer,
-                Movies = movies
-            };
-
-            return View(viewModel);
-        }
+        return RedirectToAction(nameof(Index));
     }
 }
